@@ -59,16 +59,39 @@ def write_cards_to_set(deck_csv, set_number):
                             WHERE card_name = ?""", 
                             (card_name,)
                             )
-            card_id = cursor.fetchone()
-            card_id = card_id[0]
+            
+            result =  cursor.fetchone()
+            card_id = result[0]
 
-                           
+           
             cursor.execute("""
+                           SELECT card_count
+                           FROM sets_cards
+                           WHERE card_id = ? AND set_id = ?""",
+                           (card_id, set_number)
+                        )
+
+            existing_count = cursor.fetchone()
+            
+
+            if existing_count:
+                new_count = existing_count[0] + card_quantity
+
+                cursor.execute("""
+                               UPDATE sets_cards
+                               SET card_count = ?
+                               WHERE card_id = ? AND set_id = ?""",
+                               (new_count, card_id, set_number)
+                               )
+
+                print(f"Updated '{card_name}' in set {set_number}: New count {new_count}")
+            else:
+                cursor.execute("""
                            INSERT INTO sets_cards (card_id, set_id, card_count)
                            VALUES (:card_id, :set_id, :quantity)""", 
                            ((card_id), (set_number), (card_quantity))
                            )
-
+                print(f"Added '{card_name}' to set {set_number} with count {card_quantity}")
         conn.commit()
 
 def decks_exist(deck_csv):
@@ -79,7 +102,6 @@ def decks_exist(deck_csv):
         if not cards_exist(card_name):
             print(f'{card_name} cannot be found in the database')
             return False
-        
     return True
         
 
@@ -92,8 +114,7 @@ def cards_exist(card_name):
 
 if __name__ == "__main__":
 
-    write_cards_to_set("FinnList.csv", 1)
-    
+    write_cards_to_set("JakeList.csv", 1)
     conn.close()
 
 
