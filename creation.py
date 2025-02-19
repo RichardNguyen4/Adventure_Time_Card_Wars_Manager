@@ -114,8 +114,10 @@ def cards_exist(card_name):
 
 if __name__ == "__main__":
 
-    write_cards_to_set("JakeList.csv", 1)
+    write_cards_to_set("kickstarter.csv", 10)
     conn.close()
+
+
 
 
 
