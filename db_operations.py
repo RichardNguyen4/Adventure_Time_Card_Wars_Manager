@@ -1,7 +1,7 @@
 import sqlite3
 
-def connect_db():
-    return sqlite3.connect("adventuretimecardwars.db")
+def connect_db(database = "adventuretimecardwars.db"):
+    return sqlite3.connect(database)
 
 def get_all_cards():
     conn = connect_db()
@@ -26,6 +26,27 @@ def get_all_collection():
     collection = cursor.fetchall()
     conn.close()
     return collection
+
+def get_collection_card_count():
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("""SELECT sets_cards.card_id, SUM(collection.quantity_owned * sets_cards.card_count) AS total_count
+                   FROM collection
+                   JOIN sets_cards on collection.set_id = sets_cards.set_id
+                   GROUP BY sets_cards.card_id;
+                   """)
+    cards_in_collection = cursor.fetchall()
+    conn.close()
+    return cards_in_collection
+
+def update_set_count_in_collections(set_id, count):
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("""UPDATE collection
+                   SET quantity_owned = ?
+                   WHERE set_id = ?""", (count, set_id))
+    conn.commit()
+    conn.close()
 
 def check_card_exist(card_name):
     conn = connect_db()
@@ -65,6 +86,3 @@ def get_sets(card_id):
     conn.commit()
     sets = cursor.fetchall()
     return sets
-
-
-
