@@ -192,10 +192,3 @@ def get_sets_from_card_id(card_id):
     conn.close()
 
     return sets_with_card
-
-if __name__ == "__main__":
-
-    update_set_count_in_collections(10,0)
-    print(required_sets())
-    print(get_sets_from_card_id(468))
-  
