@@ -2,6 +2,7 @@ import sqlite3
 import csv
 from collections import defaultdict
 import math
+import os
 
 def connect_db(database = "adventuretimecardwars.db"):
     return sqlite3.connect(database)
@@ -177,7 +178,6 @@ def required_sets(desired_copies=3):
         
     return card_set_map
     
-
 def get_sets_from_card_id(card_id):
     conn = connect_db()
     cursor = conn.cursor()
@@ -192,3 +192,21 @@ def get_sets_from_card_id(card_id):
     conn.close()
 
     return sets_with_card
+
+def get_image_from_card_name(card_name):
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    card_id = get_card_id(card_name)
+
+    cursor.execute("""
+                   SELECT card_image
+                   FROM cards
+                   WHERE card_id = ?
+                   """, (card_id,))
+    
+    card_image = cursor.fetchone()
+
+    return card_image[0]
+
+    
