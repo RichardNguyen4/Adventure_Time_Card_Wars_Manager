@@ -208,5 +208,17 @@ def get_image_from_card_name(card_name):
     card_image = cursor.fetchone()
 
     return card_image[0]
-
     
+def get_set_count_from_collections(set_id):
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+                    SELECT quantity_owned
+                    FROM collection
+                    WHERE set_id = ?
+                  """, (set_id,)
+                  )
+    
+    set_count = cursor.fetchone()[0]
+
+    return set_count

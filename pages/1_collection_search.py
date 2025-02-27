@@ -46,6 +46,7 @@ with col2:
         card_image_path = os.path.join("images", card_image)
 
         st.image(card_image_path)
+
     except TypeError:
         path = r"images/back_HD.jpg"
         st.image(path)
