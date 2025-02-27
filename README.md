@@ -1,6 +1,6 @@
 # Card Wars Collection Manager
 
-<img src="images/home_screen.png" style="width:50%;">
+![Card Wars Logo](images/back_HD.jpg)
 
 ## 📌 Overview
 **Card Wars Collection Manager** is a **Python and SQLite-based** application built with **Streamlit** to help users **track, organize, and manage** their **Adventure Time: Card Wars** collection.  
