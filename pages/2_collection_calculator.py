@@ -10,6 +10,7 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("Your Collection")
+     # Retrieve and display user-owned set quantities using database queries
     pack1 = st.selectbox("Collector's Pack #1: Finn vs Jake", [0, 1, 2, 3, 4, 5], (db.get_set_count_from_collections(1)))
     pack2 = st.selectbox("Collector's Pack #2: BMO vs Lady Rainicorn", [0, 1, 2, 3, 4, 5], db.get_set_count_from_collections(2))
     pack3 = st.selectbox("Collector's Pack #3: Princess Bubblegum vs LSP", [0, 1, 2, 3, 4, 5], db.get_set_count_from_collections(3))
@@ -29,7 +30,7 @@ col3, col4 = st.columns([2,7])
 is_clicked_all_done = col3.button("Update Collection")
 
 if is_clicked_all_done:
-    
+    # Update the collection based on user selections
     sets = [
     (1, pack1),
     (2, pack2),
@@ -45,8 +46,7 @@ if is_clicked_all_done:
     for set_id, set_amount in sets:
         db.update_set_count_in_collections(set_id, set_amount)
 
+    # Retrieve updated collection data and save to CSV
     collection_data = db.get_collection_card_data()
-
     db.write_collection_to_csv(collection_data)
-
     col4.write("Collection has been Updated! Check your Collectin Search!")
