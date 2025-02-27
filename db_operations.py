@@ -115,7 +115,7 @@ def get_sets(card_id):
     conn = connect_db()
     cursor = conn.cursor()
     cursor.execute("""
-                    SELECT sets.set_id, sets.set_name FROM sets_cards 
+                    SELECT sets.set_id, sets.set_name, sets_cards.card_count FROM sets_cards 
                     JOIN sets ON sets_cards.set_id = sets.set_id WHERE card_id = ?""", (card_id,))
     conn.commit()
     sets = cursor.fetchall()
@@ -123,34 +123,40 @@ def get_sets(card_id):
 
 def write_collection_to_csv(collection_data):
 
+
     with open("collection_data.csv", mode = "w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(["Card Name","Count"])
         writer.writerows(collection_data)
 
-def required_sets(desired_copies=3):
+def find_missing_cards(desired_copies):
     conn = connect_db()
     cursor = conn.cursor()
 
     cursor.execute("""
-                SELECT cards.card_name, SUM(collection.quantity_owned * sets_cards.card_count) as total_count, cards.card_id
-                FROM collection
-                JOIN sets_cards ON collection.set_id = sets_cards.set_id
-                JOIN cards ON sets_cards.card_id = cards.card_id
-                GROUP BY cards.card_name, cards.card_id
-                HAVING total_count < ?
-                """, (desired_copies,))
-    
+            SELECT cards.card_name, SUM(collection.quantity_owned * sets_cards.card_count) as total_count, cards.card_id
+            FROM collection
+            JOIN sets_cards ON collection.set_id = sets_cards.set_id
+            JOIN cards ON sets_cards.card_id = cards.card_id
+            GROUP BY cards.card_name, cards.card_id
+            HAVING total_count < ?
+            """, (desired_copies,))
+
     missing_cards = cursor.fetchall()
 
     if not missing_cards:
         conn.close()
         return []
-    
+
+    return missing_cards
+
+def required_sets(missing_cards, desired_copies=3):
+    conn = connect_db()
+    cursor = conn.cursor()
 
     card_set_map = defaultdict(list) 
 
-    for card_name, current_count, card_id in missing_cards:
+    for _, current_count, card_id in missing_cards:
         cursor.execute("""
                         SELECT sets.set_id, sets.set_name, sets_cards.card_count
                         FROM sets_cards
@@ -161,7 +167,7 @@ def required_sets(desired_copies=3):
         
         for set_id, set_name, card_count in sets_with_card:
             if card_count > 0:
-                copies_needed = max(0, desired_copies - current_count)
+                copies_needed = max(0, (desired_copies - current_count))
                 sets_needed = math.ceil(copies_needed / card_count)
                 if set_id not in card_set_map:
                     card_set_map[set_id] = (set_name, sets_needed)
